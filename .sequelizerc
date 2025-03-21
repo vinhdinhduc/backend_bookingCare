@@ -1,0 +1,10 @@
+var path = require("path");
+
+
+module.exports = {
+    "config": "src/config/config.json",
+  "models-path": "src/models",
+  "seeders-path": "src/seeders",
+  "migrations-path": "src/migrations"
+
+}
