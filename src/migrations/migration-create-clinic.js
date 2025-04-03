@@ -9,6 +9,9 @@ module.exports = {
         allowNull: false,
         autoIncrement: false,
       },
+      name: {
+        type: Sequelize.STRING,
+      },
       address: {
         type: Sequelize.STRING,
       },
