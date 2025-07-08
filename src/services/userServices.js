@@ -1,7 +1,30 @@
+import { where } from "sequelize";
 import db from "../models/index";
 import bcrypt from "bcryptjs";
 
 const salt = bcrypt.genSaltSync(10);
+
+const checkUserEmail = (email) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!email || email === undefined || email === null) {
+        console.log("checkUserEmail: email is undefined/null");
+        resolve(false);
+        return;
+      }
+      let user = await db.User.findOne({
+        where: { email: email },
+      });
+      if (user) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 const handleUserLogin = async (email, password) => {
   try {
     const user = await db.User.findOne({
@@ -68,6 +91,7 @@ const getAllUser = (userId) => {
 const hashUserPassword = (password) => {
   return new Promise(async (resolve, reject) => {
     try {
+      if (!password) throw new Error("Password is missing!");
       let hashPassword = await bcrypt.hashSync(password, salt);
       resolve(hashPassword);
     } catch (error) {
@@ -79,6 +103,7 @@ const hashUserPassword = (password) => {
 const createNewUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log("Received password:", data.password);
       let check = await checkUserEmail(data.email);
       if (check) {
         resolve({
@@ -94,8 +119,10 @@ const createNewUser = (data) => {
         lastName: data.lastName,
         address: data.address,
         phoneNumber: data.phoneNumber,
-        gender: data.gender === "1" ? true : false,
+        gender: data.gender,
         roleId: data.roleId,
+        positionId: data.positionId,
+        image: data.avatar,
       });
       resolve({
         errCode: 0,
@@ -141,11 +168,19 @@ const updateUserData = (data) => {
       }
       let user = await db.User.findOne({
         where: { id: data.id },
+        raw: false,
       });
       if (user) {
         (user.firstName = data.firstName),
           (user.lastName = data.lastName),
-          (user.address = data.address);
+          (user.address = data.address),
+          (user.phoneNumber = data.phoneNumber),
+          (user.gender = data.gender),
+          (user.roleId = data.roleId),
+          (user.positionId = data.positionId);
+        if (data.avatar) {
+          user.image = data.avatar;
+        }
         await user.save();
         resolve({
           errCode: 0,
@@ -162,9 +197,36 @@ const updateUserData = (data) => {
     }
   });
 };
+
+let getAllCodeService = (typeInput) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("getAllCodeService called with:", typeInput);
+      if (!typeInput) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing parameter required",
+        });
+      } else {
+        let res = {};
+        let allcode = await db.Allcode.findAll({
+          where: { type: typeInput },
+        });
+        res.errCode = 0;
+        res.data = allcode;
+        resolve(res);
+      }
+    } catch (error) {
+      reject(e);
+    }
+  });
+};
+
 module.exports = {
   handleUserLogin: handleUserLogin,
   getAllUser: getAllUser,
   createNewUser: createNewUser,
   deleteUser: deleteUser,
+  updateUserData: updateUserData,
+  getAllCodeService: getAllCodeService,
 };

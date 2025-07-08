@@ -1,66 +1,28 @@
 import userServices from "../services/userServices.js";
+import db from "../models";
+import bcrypt from "bcryptjs";
+let handleUserLogin = async (req, res) => {
+  // Thêm req, res làm tham số
+  try {
+    let { email, password } = req.body;
+    console.log("Request body:", { email, password }); // Kiểm tra dữ liệu nhận được
 
-let handleUserLogin = (email, password) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let userData = {};
-      let isExist = await checkUserEmail(email);
-      if (isExist) {
-        //user already exist
-        let user = await db.User.findOne({
-          attributes: ["email", "roleId", "password"],
-          where: { email: email },
-          raw: true,
-        });
-        if (user) {
-          //compare password: dùng cách 1 hay cách 2 đều chạy đúng cả =))
-          // Cách 1: dùng asynchronous (bất đồng bộ)
-          //let check = await bcrypt.compare(password, user.password);
-
-          // Cách 2: dùng synchronous  (đồng bộ)
-          let check = bcrypt.compareSync(password, user.password);
-
-          if (check) {
-            userData.errCode = 0;
-            userData.errMessage = "OK";
-
-            delete user.password;
-            userData.user = user;
-          } else {
-            userData.errCode = 3;
-            userData.errMessage = "Wrong password";
-          }
-        } else {
-          userData.errCode = 2;
-          userData.errMessage = `User not found`;
-        }
-      } else {
-        //return error
-        userData.errCode = 1;
-        userData.errMessage = `Your's Email isn't exist in our system, plz try other email`;
-      }
-      resolve(userData);
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
-
-let checkUserEmail = (userEmail) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let user = await db.User.findOne({
-        where: { email: userEmail },
+    if (!email || !password) {
+      return res.status(400).json({
+        errCode: 1,
+        errMessage: "Missing email or password",
       });
-      if (user) {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    } catch (e) {
-      reject(e);
     }
-  });
+
+    let userData = await userServices.handleUserLogin(email, password);
+    return res.status(200).json(userData);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      errCode: 500,
+      errMessage: "Internal server error",
+    });
+  }
 };
 
 const handleCreateNewUser = async (req, res) => {
@@ -83,6 +45,7 @@ const handleEditUser = async (req, res) => {
   let message = await userServices.updateUserData(data);
   return res.status(200).json(message);
 };
+
 const handleGetAllUsers = async (req, res) => {
   let id = req.query.id;
 
@@ -101,10 +64,24 @@ const handleGetAllUsers = async (req, res) => {
     users,
   });
 };
+const handleGetAllCode = async (req, res) => {
+  try {
+    let data = await userServices.getAllCodeService(req.query.type);
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log("Get all code error", e);
+
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error from server",
+    });
+  }
+};
 module.exports = {
   handleUserLogin,
   handleGetAllUsers,
   handleEditUser,
   handleDeleteUser,
   handleCreateNewUser,
+  handleGetAllCode,
 };
