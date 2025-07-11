@@ -28,7 +28,7 @@ const checkUserEmail = (email) => {
 const handleUserLogin = async (email, password) => {
   try {
     const user = await db.User.findOne({
-      attributes: ["email", "roleId", "password"],
+      attributes: ["email", "roleId", "password", "lastName", "firstName"],
       where: { email },
       raw: true,
     });
@@ -47,12 +47,18 @@ const handleUserLogin = async (email, password) => {
         errMessage: "Invalid password",
       };
     }
+    const userData = {
+      email: user.email,
+      firstName: user.firstName,
+      roleId: user.roleId,
+      lastName: user.lastName,
+    };
 
     delete user.password;
     return {
       errCode: 0,
       errMessage: "OK",
-      user,
+      user: userData,
     };
   } catch (error) {
     console.error("Login error:", error);
