@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Booking extends Model {
     /**
@@ -9,21 +7,26 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {//Định danh các mối quan hệ 
+    static associate(models) {
+      //Định danh các mối quan hệ
       // define association here
     }
-  };
-  Booking.init({
-    // id:DataTypes.INTEGER,
-    statusId: DataTypes.STRING,
-    doctorId: DataTypes.INTEGER,
-    patientId: DataTypes.INTEGER,
-    date: DataTypes.DATE,
-    timeType:DataTypes.STRING,
-    
-  }, {
-    sequelize,
-    modelName: 'Booking',
-  });
+  }
+  Booking.init(
+    {
+      // id:DataTypes.INTEGER,
+      statusId: DataTypes.STRING,
+      doctorId: DataTypes.INTEGER,
+      patientId: DataTypes.INTEGER,
+      date: DataTypes.STRING,
+      timeType: DataTypes.STRING,
+      token: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "Booking",
+      freezeTableName: true,
+    }
+  );
   return Booking;
 };

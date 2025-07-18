@@ -4,9 +4,9 @@ module.exports = {
     await queryInterface.createTable("allcodes", {
       id: {
         type: Sequelize.INTEGER,
-        primaryKey: false,
+        primaryKey: true,
         allowNull: false,
-        autoIncrement: false,
+        autoIncrement: true,
       },
       keyMap: {
         type: Sequelize.STRING,
