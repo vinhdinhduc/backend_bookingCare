@@ -58,24 +58,43 @@ let getAllDoctorService = () => {
     }
   });
 };
+
+let checkRequiredField = (inputData) => {
+  let arrField = [
+    "doctorId",
+    "contentHTML",
+    "contentMarkdown",
+    "action",
+    "selectedPrice",
+    "selectedPayment",
+    "selectedProvince",
+    "nameClinic",
+    "addressClinic",
+    "note",
+    "specialtyId",
+  ];
+  let isValid = true;
+  let element = "";
+  for (let i = 0; i < arrField.length; i++) {
+    if (!inputData[arrField[i]]) {
+      isValid = false;
+      element = arrField[i];
+      break;
+    }
+  }
+  return {
+    isValid: isValid,
+    element: element,
+  };
+};
 let saveInfoDoctorService = (inputData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (
-        !inputData.doctorId ||
-        !inputData.contentHTML ||
-        !inputData.contentMarkdown ||
-        !inputData.action ||
-        !inputData.selectedPrice ||
-        !inputData.selectedPayment ||
-        !inputData.selectedProvince ||
-        !inputData.nameClinic ||
-        !inputData.addressClinic ||
-        !inputData.note
-      ) {
+      let checkObj = checkRequiredField(inputData);
+      if (checkObj.isValid === false) {
         resolve({
           errCode: 1,
-          errMessage: "Missing required parameters",
+          errMessage: `Missing required : ${checkObj.element}`,
         });
       } else {
         if (inputData.action === "CREATE") {
@@ -111,6 +130,8 @@ let saveInfoDoctorService = (inputData) => {
           doctorInfo.nameClinic = inputData.nameClinic;
           doctorInfo.addressClinic = inputData.addressClinic;
           doctorInfo.note = inputData.note;
+          doctorInfo.specialtyId = inputData.specialtyId;
+          doctorInfo.clinicId = inputData.clinicId;
           await doctorInfo.save();
         } else {
           await db.Doctor_Info.create({
@@ -121,6 +142,8 @@ let saveInfoDoctorService = (inputData) => {
             nameClinic: inputData.nameClinic,
             addressClinic: inputData.addressClinic,
             note: inputData.note,
+            specialtyId: inputData.specialtyId,
+            clinicId: inputData.clinicId,
           });
         }
       }
@@ -420,6 +443,63 @@ let getProfileDoctorById = (inputId) => {
     }
   });
 };
+let getPatientAppointment = (doctorId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // const dateObj = new Date(parseInt(date));
+      // const startDate = new Date(dateObj.setHours(0, 0, 0, 0));
+      // const endDate = new Date(dateObj.setHours(23, 59, 59, 999));
+      if (!doctorId || !date) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing parameter!",
+        });
+      } else {
+        let dataPatient = await db.Booking.findAll({
+          where: {
+            doctorId: doctorId,
+            date: date,
+            statusId: "S2",
+            // date: {
+            //   [db.Sequelize.Op.between]: [startDate, endDate],
+            // },
+          },
+          include: [
+            {
+              model: db.User,
+              as: "patientData",
+              attributes: [
+                "firstName",
+                "lastName",
+                "address",
+                "gender",
+                "email",
+              ],
+              include: [
+                {
+                  model: db.Allcode,
+                  as: "genderData",
+                  attributes: ["valueVi", "valueEn"],
+                },
+              ],
+            },
+          ],
+          raw: false,
+          nest: true,
+        });
+        if (!dataPatient) dataPatient = [];
+        resolve({
+          errCode: 0,
+          data: dataPatient,
+        });
+      }
+    } catch (error) {
+      console.log("error servive", error);
+
+      reject(error);
+    }
+  });
+};
 module.exports = {
   getTopDoctorHome: getTopDoctorHome,
   getAllDoctorService: getAllDoctorService,
@@ -429,4 +509,5 @@ module.exports = {
   getScheduleByDate: getScheduleByDate,
   getExtraInfoById: getExtraInfoById,
   getProfileDoctorById: getProfileDoctorById,
+  getPatientAppointment: getPatientAppointment,
 };

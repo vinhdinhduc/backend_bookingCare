@@ -10,6 +10,16 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       //Định danh các mối quan hệ
       // define association here
+      Booking.belongsTo(models.User, {
+        foreignKey: "patientId",
+        targetKey: "id",
+        as: "patientData",
+      });
+      // Booking.belongsTo(models.Allcode, {
+      //   foreignKey: "keyMap",
+      //   targetKey: "id",
+      //   as: "genderValueData",
+      // });
     }
   }
   Booking.init(

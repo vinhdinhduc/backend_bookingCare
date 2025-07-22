@@ -23,6 +23,7 @@ let sendSimpleEmail = async (dataSend) => {
 };
 
 let getBodyHTML = (dataSend) => {
+  console.log("Sending token:", dataSend.redirectLink);
   let result = "";
 
   if (dataSend.language === "vi") {

@@ -100,6 +100,23 @@ let getProfileDoctorById = async (req, res) => {
     });
   }
 };
+let getPatientAppointment = async (req, res) => {
+  try {
+    let data = await doctorService.getPatientAppointment(
+      req.query.doctorId,
+      req.query.date
+    );
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log("error controller", error);
+
+    return res.status(200).json({
+      errCode: 1,
+      errMessage: "Error from server",
+    });
+  }
+};
+
 module.exports = {
   getTopDoctorHomeController,
   getAllDoctors,
@@ -109,4 +126,5 @@ module.exports = {
   getScheduleByDate,
   getExtraInfoById,
   getProfileDoctorById,
+  getPatientAppointment,
 };
