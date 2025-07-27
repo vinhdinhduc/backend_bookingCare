@@ -2,10 +2,8 @@ import userServices from "../services/userServices.js";
 import db from "../models";
 import bcrypt from "bcryptjs";
 let handleUserLogin = async (req, res) => {
-  // Thêm req, res làm tham số
   try {
     let { email, password } = req.body;
-    console.log("Request body:", { email, password }); // Kiểm tra dữ liệu nhận được
 
     if (!email || !password) {
       return res.status(400).json({

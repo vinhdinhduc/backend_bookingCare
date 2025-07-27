@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Markdown",
-      tableName: "markdown",
+      freezeTableName: true,
     }
   );
   return Markdown;

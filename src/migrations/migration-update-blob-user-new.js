@@ -1,20 +1,18 @@
 const { QueryInterface } = require("sequelize");
-
 module.exports = {
-  up: (QueryInterface, Sequelize) => {
-    return Promise.all([
-      QueryInterface.changeColumn("Users", "image", {
-        type: Sequelize.BLOB("long"),
-        allowNull: true,
-      }),
-    ]);
+  up: async (queryInterface, Sequelize) => {
+    return queryInterface.sequelize.query(`
+      ALTER TABLE "Users"
+      ALTER COLUMN "image"
+      TYPE BYTEA
+      USING decode("image", 'escape');
+    `);
   },
-  down: (QueryInterface, Sequelize) => {
-    return Promise.all([
-      QueryInterface.changeColumn("Users", "image", {
-        type: Sequelize.STRING,
-        allowNull: true,
-      }),
-    ]);
+
+  down: async (queryInterface, Sequelize) => {
+    return queryInterface.changeColumn("Users", "image", {
+      type: Sequelize.STRING,
+      allowNull: true,
+    });
   },
 };

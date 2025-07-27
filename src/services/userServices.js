@@ -8,7 +8,6 @@ const checkUserEmail = (email) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!email || email === undefined || email === null) {
-        console.log("checkUserEmail: email is undefined/null");
         resolve(false);
         return;
       }
@@ -28,7 +27,14 @@ const checkUserEmail = (email) => {
 const handleUserLogin = async (email, password) => {
   try {
     const user = await db.User.findOne({
-      attributes: ["email", "roleId", "password", "lastName", "firstName"],
+      attributes: [
+        "id",
+        "email",
+        "roleId",
+        "password",
+        "lastName",
+        "firstName",
+      ],
       where: { email },
       raw: true,
     });
@@ -48,6 +54,7 @@ const handleUserLogin = async (email, password) => {
       };
     }
     const userData = {
+      id: user.id,
       email: user.email,
       firstName: user.firstName,
       roleId: user.roleId,
@@ -85,7 +92,6 @@ const getAllUser = (userId) => {
           },
         });
       }
-      console.log("Retrieved users:", users);
 
       resolve(users);
     } catch (error) {
@@ -109,7 +115,6 @@ const hashUserPassword = (password) => {
 const createNewUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("Received password:", data.password);
       let check = await checkUserEmail(data.email);
       if (check) {
         resolve({
@@ -207,7 +212,6 @@ const updateUserData = (data) => {
 let getAllCodeService = (typeInput) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("getAllCodeService called with:", typeInput);
       if (!typeInput) {
         resolve({
           errCode: 1,
